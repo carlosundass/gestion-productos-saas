@@ -1,61 +1,42 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { ShieldCheck, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [pass, setPass] = useState("");
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handle = async (e) => {
     e.preventDefault();
     try {
-      await login(email, password);
+      await login(email, pass);
       navigate("/");
-    } catch (err) {
-      setError("Verifica tus credenciales e intenta nuevamente.");
-    }
+    } catch { alert("Error en acceso"); }
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-6">
-      <div className="max-w-md w-full">
-        <div className="bg-white rounded-[2.5rem] shadow-xl shadow-blue-900/5 p-10 border border-slate-100">
-          <div className="mb-10 text-center">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-blue-600 text-white mb-6 shadow-xl shadow-blue-200">
-              <ShieldCheck size={40} />
-            </div>
-            <h2 className="text-3xl font-black text-slate-900 tracking-tighter">Bienvenido</h2>
-            <p className="text-slate-400 mt-2 font-medium">Ingresa a tu panel de control</p>
+    <div className="flex-1 flex flex-col justify-center items-center px-8 pb-12 animate-qnv">
+      <div className="w-full text-center mb-10">
+        <h1 className="text-4xl font-black tracking-tighter text-gray-900 italic leading-none">stocksafe</h1>
+        <p className="text-blue-600 font-bold text-xs uppercase tracking-widest mt-2">Acceso Profesional</p>
+      </div>
+      
+      <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl border border-gray-50 w-full">
+        <form onSubmit={handle} className="space-y-4">
+          <div>
+            <label className="text-[10px] font-black text-gray-400 uppercase ml-2">Email Usuario</label>
+            <input type="email" required className="w-full p-4 bg-gray-50 rounded-2xl outline-none font-bold text-gray-800" value={email} onChange={e=>setEmail(e.target.value)} />
           </div>
-
-          {error && <div className="bg-rose-50 text-rose-600 p-4 rounded-2xl text-sm mb-6 font-bold text-center border border-rose-100">{error}</div>}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 ml-1">Email Corporativo</label>
-              <input type="email" required value={email} onChange={(e)=>setEmail(e.target.value)}
-                className="w-full px-6 py-4 rounded-2xl bg-slate-50 border-transparent focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
-                placeholder="ejemplo@empresa.cl" />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 ml-1">Contraseña</label>
-              <input type="password" required value={password} onChange={(e)=>setPassword(e.target.value)}
-                className="w-full px-6 py-4 rounded-2xl bg-slate-50 border-transparent focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium"
-                placeholder="••••••••" />
-            </div>
-            <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl transition-all shadow-lg shadow-blue-200 flex items-center justify-center gap-2 group">
-              ENTRAR AL SISTEMA
-              <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-            </button>
-          </form>
-        </div>
-        <p className="text-center mt-8 text-slate-400 text-sm font-medium">
-          &copy; 2026 Carlos • Gestión Inteligente
-        </p>
+          <div>
+            <label className="text-[10px] font-black text-gray-400 uppercase ml-2">Contraseña</label>
+            <input type="password" required className="w-full p-4 bg-gray-50 rounded-2xl outline-none font-black tracking-widest" value={pass} onChange={e=>setPass(e.target.value)} />
+          </div>
+          <button type="submit" className="w-full bg-blue-600 text-white font-black p-5 rounded-2xl uppercase text-sm mt-4 shadow-lg active:scale-95 transition-transform">
+            Entrar ✅
+          </button>
+        </form>
       </div>
     </div>
   );

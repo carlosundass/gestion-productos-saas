@@ -4,15 +4,15 @@
 
 @layer base {
   body {
-    @apply bg-[#F8FAFC] text-[#1E293B] font-sans antialiased;
+    margin: 0;
+    background-color: #F8F9FB;
+    font-family: system-ui, -apple-system, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    @apply text-slate-900;
   }
 }
 
-/* Efecto suave para las tarjetas estilo quenosevenza.cl */
-.card-premium {
-  @apply bg-white rounded-3xl border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1;
-}
-
-.btn-primary {
-  @apply bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95;
+/* Animación de entrada suave */
+.animate-qnv {
+  @apply animate-in fade-in zoom-in-95 duration-300;
 }

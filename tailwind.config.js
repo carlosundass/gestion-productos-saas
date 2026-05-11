@@ -7,14 +7,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: {
-          primary: '#3b82f6',
-          dark: '#0f172a',
-          light: '#f8fafc'
+        qnsv: {
+          bg: '#F8F9FB',
+          blue: '#2563eb',
+          gray: '#F4F6F8',
         }
       },
       borderRadius: {
-        '3xl': '1.5rem',
+        'qnsv': '2.5rem',
       }
     },
   },

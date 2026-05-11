@@ -1,111 +1,86 @@
 import { useState, useEffect } from "react";
 import { db } from "../firebase/config";
-import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy } from "firebase/firestore";
-import { differenceInDays, parseISO, format } from "date-fns";
-import { es } from "date-fns/locale";
-import { Plus, Trash2, Search, Filter, Calendar, Tag } from "lucide-react";
+import { collection, addDoc, onSnapshot, deleteDoc, doc } from "firebase/firestore";
+import { Search, Plus, Trash2, X, Calendar, Tag } from "lucide-react";
+import { differenceInDays, parseISO } from "date-fns";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({
-    nombre: "", marca: "", lote: "", fechaVencimiento: "", proveedor: "", cantidad: "", categoria: ""
-  });
+  const [busqueda, setBusqueda] = useState("");
+  const [mostrarForm, setMostrarForm] = useState(false);
+  const [nuevoItem, setNuevoItem] = useState({ nombre: '', marca: '', fecha: '', cantidad: '' });
 
-  const fetchProducts = async () => {
-    const q = query(collection(db, "productos"), orderBy("fechaVencimiento", "asc"));
-    const querySnapshot = await getDocs(q);
-    const prodArray = [];
-    querySnapshot.forEach((doc) => prodArray.push({ id: doc.id, ...doc.data() }));
-    setProducts(prodArray);
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "productos"), (snap) => {
+      setProducts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+    return () => unsub();
+  }, []);
+
+  const handleAdd = async (e) => {
+    e.preventDefault();
+    await addDoc(collection(db, "productos"), { ...nuevoItem, creadoEn: new Date().getTime() });
+    setMostrarForm(false);
+    setNuevoItem({ nombre: '', marca: '', fecha: '', cantidad: '' });
   };
 
-  useEffect(() => { fetchProducts(); }, []);
-
-  const getSemaforo = (fecha) => {
-    const days = differenceInDays(parseISO(fecha), new Date());
-    if (days < 0) return { bg: "bg-rose-50", text: "text-rose-700", border: "border-rose-100", label: "Vencido", dot: "bg-rose-500" };
-    if (days <= 30) return { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-100", label: `Vence en ${days} días`, dot: "bg-amber-500" };
-    return { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-100", label: "Estado Óptimo", dot: "bg-emerald-500" };
+  const getEst = (fecha) => {
+    const d = differenceInDays(parseISO(fecha), new Date());
+    if (d < 0) return { t: 'VENCIDO', bg: 'bg-gray-100', border: 'border-gray-200', text: 'text-gray-500', icon: '💀' };
+    if (d <= 7) return { t: 'URGENTE', bg: 'bg-red-50', border: 'border-red-100', text: 'text-red-600', icon: '🔴' };
+    return { t: 'TRANQUI', bg: 'bg-green-50', border: 'border-green-100', text: 'text-green-600', icon: '🟢' };
   };
-
-  const filteredProducts = products.filter(p => 
-    p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    p.marca.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-10">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div>
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Inventario</h2>
-          <p className="text-slate-500">Control dinámico de fechas y stock.</p>
-        </div>
-        <button onClick={() => setShowModal(true)} 
-          className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 font-bold">
-          <Plus size={20} /> Agregar Producto
-        </button>
+    <div className="animate-qnv">
+      <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3 mb-6">
+        <Search size={18} className="text-gray-400 ml-1" />
+        <input type="text" placeholder="Buscar productos..." className="flex-1 outline-none text-sm font-bold text-gray-700 bg-transparent" value={busqueda} onChange={e=>setBusqueda(e.target.value)} />
       </div>
 
-      <div className="relative group">
-        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
-          <Search size={20} />
-        </div>
-        <input 
-          type="text" 
-          placeholder="Buscar por nombre o marca..."
-          className="w-full pl-12 pr-4 py-4 bg-white border border-slate-100 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProducts.map((p) => {
-          const status = getSemaforo(p.fechaVencimiento);
+      <div className="space-y-3">
+        {products.filter(p => p.nombre.toLowerCase().includes(busqueda.toLowerCase())).map(p => {
+          const est = getEst(p.fecha);
           return (
-            <div key={p.id} className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col card-hover">
-              <div className={`p-4 border-b ${status.border} ${status.bg} flex justify-between items-center`}>
-                <span className={`text-xs font-bold uppercase tracking-widest ${status.text} flex items-center gap-1.5`}>
-                  <div className={`w-2 h-2 rounded-full ${status.dot}`} />
-                  {status.label}
-                </span>
-                <span className="text-slate-400 text-xs font-medium">Lote: {p.lote}</span>
+            <div key={p.id} className={`p-5 rounded-[1.5rem] border-2 flex items-center justify-between shadow-sm ${est.bg} ${est.border}`}>
+              <div className="flex-1">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className={`text-[9px] font-black uppercase tracking-widest ${est.text}`}>{est.icon} {est.t}</span>
+                </div>
+                <h3 className="font-black text-[16px] text-gray-900 leading-tight">{p.nombre}</h3>
+                <p className="text-[10px] font-bold text-gray-500 uppercase mt-1">Vence: {p.fecha}</p>
               </div>
-              
-              <div className="p-6 space-y-4 flex-1">
-                <div>
-                  <h4 className="text-xl font-bold text-slate-800 leading-tight">{p.nombre}</h4>
-                  <p className="text-slate-400 text-sm font-medium">{p.marca}</p>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4 pt-2">
-                  <div className="flex items-center gap-2 text-slate-500">
-                    <Calendar size={16} className="text-blue-500" />
-                    <span className="text-xs font-medium">{p.fechaVencimiento}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-slate-500">
-                    <Tag size={16} className="text-blue-500" />
-                    <span className="text-xs font-medium">{p.categoria}</span>
-                  </div>
-                </div>
-
-                <div className="pt-4 flex justify-between items-end">
-                  <div>
-                    <p className="text-xs text-slate-400 uppercase font-bold tracking-tighter">Stock Disponible</p>
-                    <p className="text-2xl font-black text-slate-800">{p.cantidad} <span className="text-sm font-normal text-slate-400">uds</span></p>
-                  </div>
-                  <button onClick={() => deleteDoc(doc(db, "productos", p.id)).then(fetchProducts)}
-                    className="p-3 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all">
-                    <Trash2 size={20} />
-                  </button>
-                </div>
-              </div>
+              <button onClick={() => deleteDoc(doc(db, "productos", p.id))} className="text-gray-300 hover:text-red-500 p-2">
+                <Trash2 size={18} />
+              </button>
             </div>
           );
         })}
       </div>
+
+      {/* Botón Flotante */}
+      <button onClick={() => setMostrarForm(true)} className="fixed bottom-24 right-6 w-14 h-14 bg-gray-900 text-white rounded-full shadow-xl flex items-center justify-center active:scale-95 z-30">
+        <Plus size={24} strokeWidth={3} />
+      </button>
+
+      {/* Modal Agregar */}
+      {mostrarForm && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setMostrarForm(false)}></div>
+          <form onSubmit={handleAdd} className="bg-white w-full max-w-md rounded-t-[2.5rem] p-8 pb-12 shadow-2xl relative z-10 animate-in slide-in-from-bottom duration-300">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-black italic">Añadir Producto</h2>
+              <button type="button" onClick={() => setMostrarForm(false)} className="bg-gray-100 p-2 rounded-full"><X size={18}/></button>
+            </div>
+            <div className="space-y-4">
+              <input required type="text" placeholder="Nombre del producto" className="w-full p-4 bg-gray-50 rounded-2xl font-bold outline-none border-2 border-transparent focus:border-blue-200" value={nuevoItem.nombre} onChange={e=>setNuevoItem({...nuevoItem, nombre: e.target.value})} />
+              <input required type="date" className="w-full p-4 bg-gray-50 rounded-2xl font-bold outline-none" value={nuevoItem.fecha} onChange={e=>setNuevoItem({...nuevoItem, fecha: e.target.value})} />
+              <input required type="number" placeholder="Cantidad" className="w-full p-4 bg-gray-50 rounded-2xl font-bold outline-none" value={nuevoItem.cantidad} onChange={e=>setNuevoItem({...nuevoItem, cantidad: e.target.value})} />
+              <button type="submit" className="w-full bg-blue-600 text-white font-black p-5 rounded-2xl uppercase text-sm shadow-xl">Guardar en Inventario</button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

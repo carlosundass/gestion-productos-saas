@@ -1,77 +1,46 @@
-import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { LayoutDashboard, PackageSearch, Users, LogOut, Menu, X, ShieldCheck } from "lucide-react";
-import { useState } from "react";
+import { Home, Package, LogOut, Bell } from "lucide-react";
 
 export default function Layout() {
-  const { logout, role } = useAuth();
-  const navigate = useNavigate();
+  const { logout, user } = useAuth();
   const location = useLocation();
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  const handleLogout = async () => {
-    await logout();
-    navigate("/login");
-  };
-
-  const navItems = [
-    { name: "Dashboard", path: "/", icon: <LayoutDashboard size={20} /> },
-    { name: "Productos", path: "/productos", icon: <PackageSearch size={20} /> },
-  ];
-
-  if (role === 'admin') {
-    navItems.push({ name: "Usuarios", path: "/admin", icon: <Users size={20} /> });
-  }
 
   return (
-    <div className="flex h-screen bg-[#F8FAFC] overflow-hidden">
-      {/* Sidebar para Desktop */}
-      <aside className={`fixed lg:static inset-y-0 left-0 w-72 bg-white border-r border-slate-100 z-50 transform transition-transform duration-300 ease-in-out ${menuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-        <div className="p-8">
-          <div className="flex items-center gap-3 text-blue-600">
-            <ShieldCheck size={32} strokeWidth={2.5} />
-            <h1 className="text-2xl font-black tracking-tighter text-slate-900">STOCK<span className="text-blue-600">SAFE</span></h1>
-          </div>
+    <div className="flex flex-col h-full flex-1">
+      {/* Header Fijo */}
+      <header className="px-6 pt-10 pb-4 flex justify-between items-center bg-[#F4F6F8]/80 backdrop-blur-md sticky top-0 z-20">
+        <div>
+          <h1 className="text-2xl font-black tracking-tight text-gray-900 leading-none italic">stocksafe</h1>
+          <p className="font-bold text-[10px] uppercase tracking-widest text-blue-600 mt-1">Panel de Control</p>
         </div>
+        <button onClick={() => logout()} className="bg-white border border-gray-100 p-2.5 rounded-full text-gray-400 shadow-sm">
+          <LogOut size={18} />
+        </button>
+      </header>
 
-        <nav className="px-4 space-y-2">
-          {navItems.map((item) => (
-            <Link key={item.name} to={item.path} onClick={() => setMenuOpen(false)}
-              className={`flex items-center gap-4 px-6 py-4 rounded-2xl transition-all font-bold ${location.pathname === item.path ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-slate-500 hover:bg-slate-50 hover:text-blue-600'}`}>
-              {item.icon}
-              {item.name}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="absolute bottom-8 left-0 w-full px-4">
-          <button onClick={handleLogout} className="flex items-center gap-4 w-full px-6 py-4 text-rose-500 hover:bg-rose-50 rounded-2xl transition-all font-bold">
-            <LogOut size={20} /> Cerrar Sesión
-          </button>
-        </div>
-      </aside>
-
-      {/* Contenido Principal */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-8 lg:justify-end">
-          <button className="lg:hidden p-2 text-slate-600" onClick={() => setMenuOpen(true)}>
-            <Menu size={28} />
-          </button>
-          <div className="flex items-center gap-4">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-bold text-slate-900 capitalize">{role}</p>
-              <p className="text-xs text-slate-400">Sistema Activo</p>
-            </div>
-            <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center font-black">
-              {role?.charAt(0).toUpperCase()}
-            </div>
-          </div>
-        </header>
-
-        <div className="flex-1 overflow-y-auto p-6 lg:p-12">
-          <Outlet />
-        </div>
+      {/* Contenido Scrolleable */}
+      <main className="flex-1 overflow-y-auto px-6 pb-32">
+        <Outlet />
       </main>
+
+      {/* Navegación Inferior Estilo QNSV */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 pb-8 pt-3 z-40 max-w-md mx-auto sm:rounded-b-[2.5rem]">
+        <div className="flex justify-around items-center px-4">
+          <Link to="/" className={`flex flex-col items-center gap-1 flex-1 ${location.pathname === '/' ? 'text-blue-600' : 'text-gray-400'}`}>
+            <Home size={22} className={location.pathname === '/' ? 'fill-blue-100' : ''} />
+            <span className="text-[10px] font-black uppercase tracking-widest">Inicio</span>
+          </Link>
+          <Link to="/productos" className={`flex flex-col items-center gap-1 flex-1 ${location.pathname === '/productos' ? 'text-blue-600' : 'text-gray-400'}`}>
+            <Package size={22} className={location.pathname === '/productos' ? 'fill-blue-100' : ''} />
+            <span className="text-[10px] font-black uppercase tracking-widest">Productos</span>
+          </Link>
+          <button className="flex flex-col items-center gap-1 flex-1 text-gray-400">
+            <Bell size={22} />
+            <span className="text-[10px] font-black uppercase tracking-widest">Alertas</span>
+          </button>
+        </div>
+      </nav>
     </div>
   );
 }
