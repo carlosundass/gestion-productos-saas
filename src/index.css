@@ -4,6 +4,22 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-800 font-sans antialiased;
+    @apply bg-[#F8FAFC] text-[#1E293B] font-sans antialiased;
   }
+}
+
+/* Animación para las tarjetas */
+.card-hover {
+  @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+}
+
+/* Estilo personalizado para el scroll */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-200 rounded-full hover:bg-slate-300;
 }
