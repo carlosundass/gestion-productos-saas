@@ -1,6 +1,6 @@
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { LayoutDashboard, PackageSearch, Users, LogOut, Menu, X } from "lucide-react";
+import { LayoutDashboard, PackageSearch, Users, LogOut, Menu, X, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 
 export default function Layout() {
@@ -20,56 +20,57 @@ export default function Layout() {
   ];
 
   if (role === 'admin') {
-    navItems.push({ name: "Administración", path: "/admin", icon: <Users size={20} /> });
+    navItems.push({ name: "Usuarios", path: "/admin", icon: <Users size={20} /> });
   }
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
-      {/* Sidebar Mobile */}
-      <div className={`fixed inset-0 bg-slate-900/50 z-40 lg:hidden ${menuOpen ? 'block' : 'hidden'}`} onClick={() => setMenuOpen(false)} />
-      
-      {/* Sidebar Desktop & Mobile */}
-      <aside className={`fixed lg:static top-0 left-0 h-full w-64 bg-white border-r border-slate-200 z-50 transform transition-transform duration-300 flex flex-col ${menuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-        <div className="p-6 flex justify-between items-center border-b border-slate-100">
-          <h1 className="text-xl font-bold text-slate-800 tracking-tight">Stock<span className="text-brand-primary">Safe</span></h1>
-          <button className="lg:hidden text-slate-500" onClick={() => setMenuOpen(false)}><X size={24} /></button>
+    <div className="flex h-screen bg-[#F8FAFC] overflow-hidden">
+      {/* Sidebar para Desktop */}
+      <aside className={`fixed lg:static inset-y-0 left-0 w-72 bg-white border-r border-slate-100 z-50 transform transition-transform duration-300 ease-in-out ${menuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+        <div className="p-8">
+          <div className="flex items-center gap-3 text-blue-600">
+            <ShieldCheck size={32} strokeWidth={2.5} />
+            <h1 className="text-2xl font-black tracking-tighter text-slate-900">STOCK<span className="text-blue-600">SAFE</span></h1>
+          </div>
         </div>
-        <nav className="flex-1 p-4 space-y-2">
+
+        <nav className="px-4 space-y-2">
           {navItems.map((item) => (
             <Link key={item.name} to={item.path} onClick={() => setMenuOpen(false)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${location.pathname === item.path ? 'bg-brand-primary text-white shadow-md shadow-blue-500/20' : 'text-slate-600 hover:bg-slate-50 hover:text-brand-primary'}`}>
+              className={`flex items-center gap-4 px-6 py-4 rounded-2xl transition-all font-bold ${location.pathname === item.path ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-slate-500 hover:bg-slate-50 hover:text-blue-600'}`}>
               {item.icon}
-              <span className="font-medium">{item.name}</span>
+              {item.name}
             </Link>
           ))}
         </nav>
-        <div className="p-4 border-t border-slate-100">
-          <button onClick={handleLogout} className="flex items-center gap-3 w-full px-4 py-3 text-red-500 hover:bg-red-50 rounded-lg transition-colors font-medium">
-            <LogOut size={20} /> Salir
+
+        <div className="absolute bottom-8 left-0 w-full px-4">
+          <button onClick={handleLogout} className="flex items-center gap-4 w-full px-6 py-4 text-rose-500 hover:bg-rose-50 rounded-2xl transition-all font-bold">
+            <LogOut size={20} /> Cerrar Sesión
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col h-full overflow-hidden">
-        <header className="bg-white border-b border-slate-200 p-4 flex items-center justify-between lg:justify-end shadow-sm z-30">
-          <button className="lg:hidden text-slate-600" onClick={() => setMenuOpen(true)}>
-            <Menu size={24} />
+      {/* Contenido Principal */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <header className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-8 lg:justify-end">
+          <button className="lg:hidden p-2 text-slate-600" onClick={() => setMenuOpen(true)}>
+            <Menu size={28} />
           </button>
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-brand-primary flex items-center justify-center text-white font-bold text-sm">
-              {role === 'admin' ? 'A' : 'U'}
+          <div className="flex items-center gap-4">
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-bold text-slate-900 capitalize">{role}</p>
+              <p className="text-xs text-slate-400">Sistema Activo</p>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center font-black">
+              {role?.charAt(0).toUpperCase()}
             </div>
           </div>
         </header>
-        
-        <div className="flex-1 overflow-auto p-6 lg:p-8">
+
+        <div className="flex-1 overflow-y-auto p-6 lg:p-12">
           <Outlet />
         </div>
-        
-        <footer className="py-4 text-center text-sm text-slate-400 bg-white border-t border-slate-100">
-          Desarrollado por Carlos.
-        </footer>
       </main>
     </div>
   );

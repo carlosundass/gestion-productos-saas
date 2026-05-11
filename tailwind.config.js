@@ -8,15 +8,13 @@ export default {
     extend: {
       colors: {
         brand: {
-          light: '#f8fafc',
-          DEFAULT: '#0f172a',
           primary: '#3b82f6',
-        },
-        semaforo: {
-          verde: '#22c55e',
-          amarillo: '#eab308',
-          rojo: '#ef4444',
+          dark: '#0f172a',
+          light: '#f8fafc'
         }
+      },
+      borderRadius: {
+        '3xl': '1.5rem',
       }
     },
   },

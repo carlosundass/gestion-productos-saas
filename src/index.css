@@ -8,18 +8,11 @@
   }
 }
 
-/* Animación para las tarjetas */
-.card-hover {
-  @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+/* Efecto suave para las tarjetas estilo quenosevenza.cl */
+.card-premium {
+  @apply bg-white rounded-3xl border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1;
 }
 
-/* Estilo personalizado para el scroll */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  @apply bg-transparent;
-}
-::-webkit-scrollbar-thumb {
-  @apply bg-slate-200 rounded-full hover:bg-slate-300;
+.btn-primary {
+  @apply bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95;
 }
